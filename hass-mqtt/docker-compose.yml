@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  hass:
+    image: homeassistant/qemux86-64-homeassistant
+    network_mode: host
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config:/config
+  mqtt:
+    image: toke/mosquitto
+    network_mode: host
