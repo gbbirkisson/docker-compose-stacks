@@ -1,6 +1,7 @@
 # hass-mqtt-stack
 
 ### mqtt-spy
+
 * use java-8 'sudo archlinux-java set java-8-openjdk'
 * subscribe to 'homeassistant/+/+/+'
 
