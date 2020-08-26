@@ -1,0 +1,17 @@
+version: '3'
+services:
+  keycloak:
+    image: jboss/keycloak
+    ports:
+    - 9090:8080
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+
+#http://localhost:9090/auth/realms/master/.well-known/openid-configuration
+
+#CLIENT_ID=test
+#CLIENT_SECRET=3a7db5aa-41fd-4ffe-9159-03a18a4cf81d
+#curl --data "grant_type=client_credentials&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET" http://localhost:9090/auth/realms/master/protocol/openid-connect/token
+
+#curl --data "grant_type=client_credentials&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET" http://localhost:9090/auth/realms/master/protocol/openid-connect/token | jq -r .access_token | xargs -I {} http -v GET :8080/c/tool Authorization:'Bearer {}'

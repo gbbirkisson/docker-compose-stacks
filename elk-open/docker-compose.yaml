@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  elastic:
+    image: amazon/opendistro-for-elasticsearch:1.6.0
+    environment:
+      discovery.type: single-node
+    ports:
+      - 9200:9200
+      - 9600:9600
+  kibana:
+    image: amazon/opendistro-for-elasticsearch-kibana:1.6.0
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://elastic:9200
+      ELASTICSEARCH_HOSTS: https://elastic:9200
