@@ -1,0 +1,101 @@
+version: "3"
+services:
+  node1:
+    image: enonic/xp:7.6.0-ubuntu
+    restart: always
+    networks:
+      xp_cluster:
+        ipv4_address: 192.123.0.11
+    environment:
+      NODE_IP: 192.123.0.11
+      NODE_NAME: node1
+      NODE_MASTER: "true"
+      NODE_DATA: "true"
+      NODE_APP_FILTER: "!*"
+      NODE_ACCEPT_TASKS: "false"
+    volumes:
+      - blobstore:/enonic-xp/home/repo/blob
+      - snapshots:/enonic-xp/home/snapshots
+      - ./config:/enonic-xp/home/config
+      - ./setenv.sh:/enonic-xp/home/setenv.sh
+  node2:
+    image: enonic/xp:7.6.0-ubuntu
+    restart: always
+    networks:
+      xp_cluster:
+        ipv4_address: 192.123.0.12
+    environment:
+      NODE_IP: 192.123.0.12
+      NODE_NAME: node2
+      NODE_MASTER: "false"
+      NODE_DATA: "true"
+      NODE_APP_FILTER: "!com.enonic.disttasktest.worker,*"
+      NODE_ACCEPT_TASKS: "false"
+    volumes:
+      - blobstore:/enonic-xp/home/repo/blob
+      - snapshots:/enonic-xp/home/snapshots
+      - ./config:/enonic-xp/home/config
+      - ./setenv.sh:/enonic-xp/home/setenv.sh
+  node3:
+    image: enonic/xp:7.6.0-ubuntu
+    restart: always
+    networks:
+      xp_cluster:
+        ipv4_address: 192.123.0.13
+    environment:
+      NODE_IP: 192.123.0.13
+      NODE_NAME: node3
+      NODE_MASTER: "false"
+      NODE_DATA: "true"
+      NODE_APP_FILTER: "!com.enonic.disttasktest.issuer,*"
+      NODE_ACCEPT_TASKS: "true"
+    volumes:
+      - blobstore:/enonic-xp/home/repo/blob
+      - snapshots:/enonic-xp/home/snapshots
+      - ./config:/enonic-xp/home/config
+      - ./setenv.sh:/enonic-xp/home/setenv.sh
+  # node4:
+  #   image: enonic/xp:7.6.0-ubuntu
+  #   restart: always
+  #   networks:
+  #     xp_cluster:
+  #       ipv4_address: 192.123.0.14
+  #   environment:
+  #     NODE_IP: 192.123.0.14
+  #     NODE_NAME: node3
+  #     NODE_MASTER: "false"
+  #     NODE_DATA: "true"
+  #     NODE_APP_FILTER: "*"
+  #   volumes:
+  #     - blobstore:/enonic-xp/home/repo/blob
+  #     - snapshots:/enonic-xp/home/snapshots
+  #     - ./config:/enonic-xp/home/config
+  #     - ./setenv.sh:/enonic-xp/home/setenv.sh
+  # node5:
+  #   image: enonic/xp:7.6.0-ubuntu
+  #   restart: always
+  #   networks:
+  #     xp_cluster:
+  #       ipv4_address: 192.123.0.15
+  #   environment:
+  #     NODE_IP: 192.123.0.15
+  #     NODE_NAME: node3
+  #     NODE_MASTER: "false"
+  #     NODE_DATA: "false"
+  #     NODE_APP_FILTER: "*"
+  #   volumes:
+  #     - blobstore:/enonic-xp/home/repo/blob
+  #     - snapshots:/enonic-xp/home/snapshots
+  #     - ./config:/enonic-xp/home/config
+  #     - ./setenv.sh:/enonic-xp/home/setenv.sh
+
+volumes:
+  blobstore:
+  snapshots:
+
+networks:
+  xp_cluster:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.123.0.0/24
