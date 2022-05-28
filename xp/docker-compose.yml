@@ -1,7 +1,7 @@
 version: "3"
 services:
   node1:
-    image: enonic/xp:7.6.0-ubuntu
+    image: enonic/xp:7.7.1-ubuntu
     restart: always
     networks:
       xp_cluster:
@@ -13,13 +13,15 @@ services:
       NODE_DATA: "true"
       NODE_APP_FILTER: "!*"
       NODE_ACCEPT_TASKS: "false"
+    labels:
+      io.enonic.backup.prescripts: "echo node1 pre"
     volumes:
       - blobstore:/enonic-xp/home/repo/blob
       - snapshots:/enonic-xp/home/snapshots
       - ./config:/enonic-xp/home/config
       - ./setenv.sh:/enonic-xp/home/setenv.sh
   node2:
-    image: enonic/xp:7.6.0-ubuntu
+    image: enonic/xp:7.7.1-ubuntu
     restart: always
     networks:
       xp_cluster:
@@ -31,13 +33,16 @@ services:
       NODE_DATA: "true"
       NODE_APP_FILTER: "!com.enonic.disttasktest.worker,*"
       NODE_ACCEPT_TASKS: "false"
+    labels:
+      io.enonic.backup.prescripts: "echo node2 pre"
+      io.enonic.backup.postscripts: "echo node2 post"
     volumes:
       - blobstore:/enonic-xp/home/repo/blob
       - snapshots:/enonic-xp/home/snapshots
       - ./config:/enonic-xp/home/config
       - ./setenv.sh:/enonic-xp/home/setenv.sh
   node3:
-    image: enonic/xp:7.6.0-ubuntu
+    image: enonic/xp:7.7.1-ubuntu
     restart: always
     networks:
       xp_cluster:
@@ -49,6 +54,8 @@ services:
       NODE_DATA: "true"
       NODE_APP_FILTER: "!com.enonic.disttasktest.issuer,*"
       NODE_ACCEPT_TASKS: "true"
+    labels:
+      io.enonic.backup.postscripts: "echo node3 post"
     volumes:
       - blobstore:/enonic-xp/home/repo/blob
       - snapshots:/enonic-xp/home/snapshots
@@ -91,7 +98,11 @@ services:
 
 volumes:
   blobstore:
+    labels:
+      io.enonic.backup.data: true
   snapshots:
+    labels:
+      io.enonic.backup.data: true
 
 networks:
   xp_cluster:
