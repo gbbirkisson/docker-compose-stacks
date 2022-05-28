@@ -1,0 +1,96 @@
+sources:
+  source_vector:
+    type: vector
+    address: 0.0.0.0:6000
+    version: "2"
+
+transforms:
+  source_metrics:
+    type: filter
+    inputs:
+      - source_vector
+    condition: .type != "logs"
+
+  source_logs:
+    type: filter
+    inputs:
+      - source_vector
+    condition: .type == "logs"
+
+  metrics_to_log:
+    type: metric_to_log
+    inputs:
+      - source_metrics
+    host_tag: tags.host
+
+  metrics_to_es:
+    type: remap
+    inputs:
+      - metrics_to_log
+    source: |-
+      # Extract value
+      value = if .counter.value != null {
+        .counter.value
+      } else if .gauge.value != null {
+        .gauge.value
+      } else {
+        0
+      }
+
+      # Set value
+      key = if .namespace == .tags.collector {
+        join!([.namespace, .name], "_")
+      } else {
+        join!([.tags.collector, .namespace, .name], "_")
+      }
+      . = set!(., path: [key], value)
+      .host = .tags.host
+
+      # Delete orginal value
+      del(.counter)
+      del(.gauge)
+
+      # Remove milliseconds from timestamp
+      .timestamp = format_timestamp!(.timestamp, format: "%Y-%m-%dT%H:%M:%S%Z:%z")
+
+      # Delete other stuff
+      del(.kind)
+      del(.name)
+      del(.tags)
+      del(.namespace)
+
+  metrics_merge:
+    type: reduce
+    inputs:
+      - metrics_to_es
+    group_by:
+      - host
+    # expire_after_ms: 20000
+    # flush_period_ms: 20000
+    merge_strategies:
+      "*": retain
+
+sinks:
+  # es_metrics:
+  #   type: elasticsearch
+  #   inputs:
+  #     - metrics_es_ready
+  #   endpoint: http://opensearch-node1:9200
+  #   bulk:
+  #     index: "metrics-%F"
+
+  # es_exp:
+  #   type: elasticsearch
+  #   inputs:
+  #     - logs_clean_geoip
+  #   endpoint: http://opensearch-node1:9200
+  #   bulk:
+  #     index: "logs-%F"
+  
+  console:
+    type: console
+    inputs:
+      - metrics_merge
+    target: stdout
+    encoding:
+      codec: json
